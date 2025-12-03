@@ -45,7 +45,7 @@ go build -o review-agent cmd/server/main.go
 
 ```bash
 # 示例：Linux/macOS
-export GERRIT_BASE_URL="https://codereviewqa.cixtech.com/"
+export GERRIT_BASE_URL=""
 export GERRIT_USER=""
 export OPENAI_BASE_URL=""
 export GERRIT_TOKEN=""
