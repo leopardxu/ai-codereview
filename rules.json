@@ -1,0 +1,13 @@
+{
+  "LinuxSpinSleep": true,
+  "AndroidUiSleep": true,
+  "AndroidWebView": true,
+  "FileTooLong": true,
+  "WhiteListFiles": ["/third_party/", "generated/"],
+  "FunctionLengthLimit": 200,
+  "WhiteListFunctions": ["MainActivity.onCreate", "safe_spin_section"],
+  "WhiteListFilesByLang": {"java": ["Generated.java"]},
+  "WhiteListFunctionsByLang": {"java": ["onCreate"], "c": ["safe_spin_section"]},
+  "LengthLimitByLang": {"c": 300, "java": 150},
+  "PathLengthLimit": {"app/src/": 120}
+}

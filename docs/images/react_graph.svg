@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="250" viewBox="0 0 900 250">
+  <style>
+    .box { fill:#09c; stroke:#068; stroke-width:2; rx:8; ry:8; }
+    .label { font-family: Arial, sans-serif; font-size:14px; fill:#111; }
+    .title { font-family: Arial, sans-serif; font-size:16px; font-weight:bold; fill:#111; }
+    .arrow { stroke:#333; stroke-width:2; marker-end:url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="20" y="30" class="title">ReactGraph 编排</text>
+  <rect x="40" y="70" width="180" height="70" class="box" />
+  <text x="60" y="110" class="label">ChatTemplate</text>
+
+  <rect x="260" y="70" width="180" height="70" class="box" />
+  <text x="290" y="110" class="label">ChatModel</text>
+
+  <rect x="480" y="70" width="180" height="70" class="box" />
+  <text x="520" y="110" class="label">ToolsNode</text>
+
+  <rect x="700" y="70" width="160" height="70" class="box" />
+  <text x="730" y="110" class="label">Convert</text>
+
+  <line x1="220" y1="105" x2="260" y2="105" class="arrow" />
+  <line x1="440" y1="105" x2="480" y2="105" class="arrow" />
+  <line x1="660" y1="105" x2="700" y2="105" class="arrow" />
+  <text x="720" y="160" class="label">Preview</text>
+</svg>
+
