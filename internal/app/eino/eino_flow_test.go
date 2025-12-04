@@ -18,7 +18,7 @@ func TestBuildReviewGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("compile err: %v", err)
 	}
-	out, err := r.Invoke(context.Background(), map[string]any{"changeId": "C456", "patchset": "1", "enableContext": true})
+	out, err := r.Invoke(context.Background(), map[string]any{"changeNum": "C456", "patchset": "1", "enableContext": true})
 	if err != nil {
 		t.Fatalf("invoke err: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestBuildReactGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("compile err: %v", err)
 	}
-	out, err := r.Invoke(context.Background(), map[string]any{"changeId": "C456", "patchset": "1"})
+	out, err := r.Invoke(context.Background(), map[string]any{"changeNum": "C456", "patchset": "1"})
 	if err != nil {
 		t.Fatalf("invoke err: %v", err)
 	}

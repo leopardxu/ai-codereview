@@ -23,7 +23,7 @@ func (f *ReviewFlow) Execute(ctx context.Context, fc *core.FlowContext) (core.Re
 	}
 	ctx = context.WithValue(ctx, "enableContext", fc.EnableContext)
 	start := time.Now()
-	out, err := r.Invoke(ctx, map[string]any{"changeId": fc.ChangeId, "patchset": fc.Patchset, "enableContext": fc.EnableContext})
+	out, err := r.Invoke(ctx, map[string]any{"changeNum": fc.ChangeNum, "patchset": fc.Patchset, "enableContext": fc.EnableContext})
 	dur := time.Since(start).Milliseconds()
 	if dur > 0 {
 		monitor.AddGraphExecMillis(uint64(dur))

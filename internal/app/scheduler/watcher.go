@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"eino-gerrit-review/internal/app/tools"
+	"fmt"
 	"time"
 )
 
@@ -21,8 +22,14 @@ func (w *Watcher) Run(ctx context.Context, project, branch string, pool *WorkerP
 		case <-w.Ticker.C:
 			changes, _ := gt.GetOpenChanges(project, branch, 10)
 			for _, c := range changes {
-				id := c["id"].(string)
-				pool.Submit(Task{ChangeId: id, Patchset: "1", EnableContext: enableContext})
+				// Use _number field from Gerrit API response as the unique identifier
+				num := ""
+				if n, ok := c["_number"].(float64); ok {
+					num = fmt.Sprintf("%.0f", n)
+				}
+				if num != "" {
+					pool.Submit(Task{ChangeNum: num, Patchset: "1", EnableContext: enableContext})
+				}
 			}
 		}
 	}

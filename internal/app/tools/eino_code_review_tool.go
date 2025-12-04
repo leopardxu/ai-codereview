@@ -10,7 +10,7 @@ import (
 )
 
 type reviewReq struct {
-	ChangeId      string `json:"changeId"`
+	ChangeNum     string `json:"changeNum"`
 	Patchset      string `json:"patchset"`
 	EnableContext bool   `json:"enableContext"`
 }
@@ -25,16 +25,16 @@ func NewCodeReviewTool() tool.BaseTool {
 			Name: "code_review",
 			Desc: "Run Gerrit change review and return structured preview payload",
 			ParamsOneOf: schema.NewParamsOneOfByParams(map[string]*schema.ParameterInfo{
-				"changeId":      {Type: "string", Desc: "Gerrit change id"},
+				"changeNum":     {Type: "string", Desc: "Gerrit change number"},
 				"patchset":      {Type: "string", Desc: "Gerrit patchset/revision"},
 				"enableContext": {Type: "boolean", Desc: "Enable context-enhanced review"},
 			}),
 		},
 		func(ctx context.Context, in *reviewReq) (out *reviewResp, err error) {
 			gt := &GerritTool{}
-			diffs, _ := gt.GetDiffs(in.ChangeId, in.Patchset)
+			diffs, _ := gt.GetDiffs(in.ChangeNum, in.Patchset)
 			parsed := (&DiffTool{}).Parse(diffs)
-			ctxs := (&CodeContextTool{}).Fetch(in.EnableContext, in.ChangeId, in.Patchset, parsed)
+			ctxs := (&CodeContextTool{}).Fetch(in.EnableContext, in.ChangeNum, in.Patchset, parsed)
 			static := (&StaticRuleTool{}).Run(parsed, ctxs)
 			prompt := BuildPrompt(joinPatches(parsed), ctxs)
 			llm, _ := (&LLMTool{}).Generate(prompt)

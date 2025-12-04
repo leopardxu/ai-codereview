@@ -24,7 +24,7 @@ type CodeContextTool struct{}
 var ctxCache sync.Map
 var ctxLimiter = policies.NewRateLimiter(10)
 
-func (t *CodeContextTool) Fetch(enable bool, changeId, patchset string, diffs []map[string]interface{}) []ContextInfo {
+func (t *CodeContextTool) Fetch(enable bool, changeNum, patchset string, diffs []map[string]interface{}) []ContextInfo {
 	if !enable {
 		return []ContextInfo{}
 	}
@@ -76,7 +76,7 @@ func (t *CodeContextTool) Fetch(enable bool, changeId, patchset string, diffs []
 
 			ctxLimiter.Acquire()
 			// Fetch original file content from parent revision (base), not the modified version
-			content, _ := g.GetFileContent(changeId, patchset, p)
+			content, _ := g.GetFileContent(changeNum, patchset, p)
 
 			// size limit in KB
 			limitKB := atoi(getenv("CONTEXT_FILE_LIMIT", "10"))

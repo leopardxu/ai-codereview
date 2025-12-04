@@ -70,14 +70,14 @@ func (t *GerritTool) GetOpenChanges(project, branch string, limit int) ([]map[st
 	return arr, nil
 }
 
-func (t *GerritTool) GetDiffs(changeId, patchset string) ([]map[string]interface{}, error) {
+func (t *GerritTool) GetDiffs(changeNum, patchset string) ([]map[string]interface{}, error) {
 	if t.base() == "" {
 		return []map[string]interface{}{
 			{"path": "kernel/lock.c", "lang": "c", "patch": "spin_lock(&lock);\nmsleep(20);\nspin_unlock(&lock);"},
 			{"path": "app/src/main/java/com/example/MainActivity.java", "lang": "java", "patch": "public void onCreate(){\ntry{Thread.sleep(1000);}catch(Exception e){}\n}"},
 		}, nil
 	}
-	filesURL := t.base() + "/a/changes/" + changeId + "/revisions/" + patchset + "/files/"
+	filesURL := t.base() + "/a/changes/" + changeNum + "/revisions/" + patchset + "/files/"
 	req, _ := http.NewRequest("GET", filesURL, nil)
 	h := t.authHeader()
 	if h != "" {
@@ -106,7 +106,7 @@ func (t *GerritTool) GetDiffs(changeId, patchset string) ([]map[string]interface
 			continue
 		}
 
-		du := t.base() + "/a/changes/" + changeId + "/revisions/" + patchset + "/files/" + url.PathEscape(p) + "/diff"
+		du := t.base() + "/a/changes/" + changeNum + "/revisions/" + patchset + "/files/" + url.PathEscape(p) + "/diff"
 		rq, _ := http.NewRequest("GET", du, nil)
 		if h != "" {
 			rq.Header.Set("Authorization", h)
@@ -174,7 +174,7 @@ func (t *GerritTool) GetDiffs(changeId, patchset string) ([]map[string]interface
 	return out, nil
 }
 
-func (t *GerritTool) GetFileContent(changeId, revision, file string) (string, error) {
+func (t *GerritTool) GetFileContent(changeNum, revision, file string) (string, error) {
 	if t.base() == "" {
 		if file == "kernel/lock.c" {
 			return "#include <linux/sched.h>\nvoid f(){spin_lock(&lock); msleep(20); spin_unlock(&lock);} ", nil
@@ -184,7 +184,7 @@ func (t *GerritTool) GetFileContent(changeId, revision, file string) (string, er
 		}
 		return "", nil
 	}
-	u := t.base() + "/a/changes/" + changeId + "/revisions/" + revision + "/files/" + url.PathEscape(file) + "/content"
+	u := t.base() + "/a/changes/" + changeNum + "/revisions/" + revision + "/files/" + url.PathEscape(file) + "/content"
 	req, _ := http.NewRequest("GET", u, nil)
 	h := t.authHeader()
 	if h != "" {
@@ -209,7 +209,7 @@ func (t *GerritTool) GetFileContent(changeId, revision, file string) (string, er
 
 // GetFileContentFromParent retrieves the file content from the parent (base) revision
 // This is used to get the original file before changes, not the modified version
-func (t *GerritTool) GetFileContentFromParent(changeId, revision, file string) (string, error) {
+func (t *GerritTool) GetFileContentFromParent(changeNum, revision, file string) (string, error) {
 	if t.base() == "" {
 		// Mock data for testing - return original content before changes
 		if file == "kernel/lock.c" {
@@ -221,7 +221,7 @@ func (t *GerritTool) GetFileContentFromParent(changeId, revision, file string) (
 		return "", nil
 	}
 	// Use ?parent=1 query parameter to get the file content from the parent revision (base)
-	u := t.base() + "/a/changes/" + changeId + "/revisions/" + revision + "/files/" + url.PathEscape(file) + "/content?parent=1"
+	u := t.base() + "/a/changes/" + changeNum + "/revisions/" + revision + "/files/" + url.PathEscape(file) + "/content?parent=1"
 	req, _ := http.NewRequest("GET", u, nil)
 	h := t.authHeader()
 	if h != "" {
@@ -244,11 +244,11 @@ func (t *GerritTool) GetFileContentFromParent(changeId, revision, file string) (
 	return string(dec), nil
 }
 
-func (t *GerritTool) PostReview(changeId, revision string, payload map[string]interface{}) (*http.Response, error) {
+func (t *GerritTool) PostReview(changeNum, revision string, payload map[string]interface{}) (*http.Response, error) {
 	if t.base() == "" {
 		return nil, nil
 	}
-	u := t.base() + "/a/changes/" + changeId + "/revisions/" + revision + "/review"
+	u := t.base() + "/a/changes/" + changeNum + "/revisions/" + revision + "/review"
 	b, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", u, io.NopCloser(strings.NewReader(string(b))))
 	req.Header.Set("Content-Type", "application/json")

@@ -15,7 +15,7 @@ import (
 )
 
 // BuildReviewGraph constructs an Eino Graph that orchestrates the review pipeline.
-// Input: map[string]any{"changeId":string, "patchset":string, "enableContext":bool}
+// Input: map[string]any{"changeNum":string, "patchset":string, "enableContext":bool}
 // Output: map[string]any{"preview": map[string]any}
 func BuildReviewGraph() (*compose.Graph[map[string]any, map[string]any], error) {
 	g := compose.NewGraph[map[string]any, map[string]any]()
@@ -59,17 +59,17 @@ func BuildReviewGraph() (*compose.Graph[map[string]any, map[string]any], error) 
 }
 
 type DiffOutput struct {
-	Diffs    []map[string]interface{}
-	ChangeId string
-	Patchset string
+	Diffs     []map[string]interface{}
+	ChangeNum string
+	Patchset  string
 }
 
 func diffNode(ctx context.Context, in map[string]any) (*DiffOutput, error) {
-	changeId, _ := in["changeId"].(string)
+	changeNum, _ := in["changeNum"].(string)
 	patchset, _ := in["patchset"].(string)
-	fmt.Printf("DEBUG: Fetching diffs for ChangeId: %s, Patchset: %s\n", changeId, patchset)
+	fmt.Printf("DEBUG: Fetching diffs for ChangeNum: %s, Patchset: %s\n", changeNum, patchset)
 	gt := &tools.GerritTool{}
-	diffs, err := gt.GetDiffs(changeId, patchset)
+	diffs, err := gt.GetDiffs(changeNum, patchset)
 	if err != nil {
 		fmt.Printf("DEBUG: GetDiffs error: %v\n", err)
 		return nil, err
@@ -77,7 +77,7 @@ func diffNode(ctx context.Context, in map[string]any) (*DiffOutput, error) {
 	fmt.Printf("DEBUG: Got %d raw diffs\n", len(diffs))
 	out := (&tools.DiffTool{}).Parse(diffs)
 	fmt.Printf("DEBUG: Parsed %d diffs\n", len(out))
-	return &DiffOutput{Diffs: out, ChangeId: changeId, Patchset: patchset}, nil
+	return &DiffOutput{Diffs: out, ChangeNum: changeNum, Patchset: patchset}, nil
 }
 
 func contextNode(ctx context.Context, in *DiffOutput) (struct {
@@ -86,7 +86,7 @@ func contextNode(ctx context.Context, in *DiffOutput) (struct {
 }, error) {
 	enable, _ := ctx.Value("enableContext").(bool)
 	fmt.Printf("DEBUG: Fetching context (enable=%v)\n", enable)
-	ctxs := (&tools.CodeContextTool{}).Fetch(enable, in.ChangeId, in.Patchset, in.Diffs)
+	ctxs := (&tools.CodeContextTool{}).Fetch(enable, in.ChangeNum, in.Patchset, in.Diffs)
 	fmt.Printf("DEBUG: Fetched %d context items\n", len(ctxs))
 	return struct {
 		Diffs []map[string]interface{}
@@ -150,7 +150,7 @@ func BuildReactGraph() (*compose.Graph[map[string]any, map[string]any], error) {
 	// ChatTemplate
 	tpl := prompt.FromMessages(schema.FString,
 		schema.SystemMessage("你是代码评审智能体，会调用 code_review 工具生成结构化建议"),
-		schema.UserMessage("评审变更 {changeId} 的补丁 {patchset}"),
+		schema.UserMessage("评审变更 {changeNum} 的补丁 {patchset}"),
 	)
 
 	// ChatModel with tools binding (OpenAI if available, otherwise Mock)

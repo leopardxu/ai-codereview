@@ -14,7 +14,7 @@ import (
 )
 
 type RunReviewReq struct {
-	ChangeId      string `json:"changeId"`
+	ChangeNum     string `json:"changeNum"`
 	Patchset      string `json:"patchset"`
 	EnableContext bool   `json:"enableContext"`
 	React         bool   `json:"react"`
@@ -27,22 +27,22 @@ func RunReview(r *ghttp.Request) {
 		r.Response.WriteJson(g.Map{"code": 1, "msg": "invalid request"})
 		return
 	}
-	if req.ChangeId == "" || req.Patchset == "" {
-		r.Response.WriteJson(g.Map{"code": 1, "msg": "missing changeId or patchset"})
+	if req.ChangeNum == "" || req.Patchset == "" {
+		r.Response.WriteJson(g.Map{"code": 1, "msg": "missing changeNum or patchset"})
 		return
 	}
 	// 简易校验：只允许字母数字、-、_，长度限制
-	if len(req.ChangeId) > 64 || len(req.Patchset) > 32 {
+	if len(req.ChangeNum) > 64 || len(req.Patchset) > 32 {
 		r.Response.WriteJson(g.Map{"code": 1, "msg": "param too long"})
 		return
 	}
-	if !validParam(req.ChangeId) || !validParam(req.Patchset) {
+	if !validParam(req.ChangeNum) || !validParam(req.Patchset) {
 		r.Response.WriteJson(g.Map{"code": 1, "msg": "invalid param format"})
 		return
 	}
 	f := &flows.ReviewFlow{}
 	fc := core.NewFlowContext()
-	fc.ChangeId = req.ChangeId
+	fc.ChangeNum = req.ChangeNum
 	fc.Patchset = req.Patchset
 	fc.EnableContext = req.EnableContext
 	var res core.Result
@@ -58,7 +58,7 @@ func RunReview(r *ghttp.Request) {
 			r.Response.WriteJson(g.Map{"code": 1, "msg": "compile react graph failed"})
 			return
 		}
-		out, err := runnable.Invoke(context.Background(), map[string]any{"changeId": req.ChangeId, "patchset": req.Patchset, "enableContext": req.EnableContext})
+		out, err := runnable.Invoke(context.Background(), map[string]any{"changeNum": req.ChangeNum, "patchset": req.Patchset, "enableContext": req.EnableContext})
 		if err != nil {
 			r.Response.WriteJson(g.Map{"code": 1, "msg": "invoke react graph failed"})
 			return
@@ -74,12 +74,12 @@ func RunReview(r *ghttp.Request) {
 	}
 	id := "R" + toStr(time.Now().UnixNano())
 	if v, ok := res["preview"].(map[string]interface{}); ok {
-		core.PutReview(id, v, req.ChangeId, req.Patchset)
+		core.PutReview(id, v, req.ChangeNum, req.Patchset)
 
 		// Check for AutoPublish
 		if req.AutoPublish {
 			gt := &tools.GerritTool{}
-			if _, err := gt.PostReview(req.ChangeId, req.Patchset, v); err != nil {
+			if _, err := gt.PostReview(req.ChangeNum, req.Patchset, v); err != nil {
 				// If publish fails, we still return the reviewId but with a warning or error msg
 				// For now, let's just log it or include in response
 				r.Response.WriteJson(g.Map{"code": 0, "data": g.Map{"reviewId": id, "preview": res["preview"], "published": false, "publishError": err.Error()}})
@@ -120,7 +120,7 @@ func validParam(s string) bool {
 func GetReview(r *ghttp.Request) {
 	id := r.Get("id").String()
 	if v, ok := core.GetReview(id); ok {
-		r.Response.WriteJson(g.Map{"code": 0, "data": g.Map{"reviewId": id, "preview": v.Payload, "changeId": v.ChangeId, "patchset": v.Patchset}})
+		r.Response.WriteJson(g.Map{"code": 0, "data": g.Map{"reviewId": id, "preview": v.Payload, "changeNum": v.ChangeNum, "patchset": v.Patchset}})
 		return
 	}
 	r.Response.WriteJson(g.Map{"code": 1, "msg": "not found"})
@@ -134,7 +134,7 @@ func PublishReview(r *ghttp.Request) {
 		return
 	}
 	gt := &tools.GerritTool{}
-	if _, err := gt.PostReview(v.ChangeId, v.Patchset, v.Payload); err != nil {
+	if _, err := gt.PostReview(v.ChangeNum, v.Patchset, v.Payload); err != nil {
 		r.Response.WriteJson(g.Map{"code": 1, "msg": "post review failed: " + err.Error()})
 		return
 	}

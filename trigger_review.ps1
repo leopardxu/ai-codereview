@@ -1,5 +1,5 @@
 param (
-    [string]$ChangeId = "I834a245f927b1432db41d12a3b2bd3e9718d009a",
+    [string]$ChangeNum = "59",
     [string]$Patchset = "1",
     [bool]$EnableContext = $true,
     [bool]$React = $false,
@@ -8,14 +8,14 @@ param (
 )
 
 $Body = @{
-    changeId      = $ChangeId
+    changeNum     = $ChangeNum
     patchset      = $Patchset
     enableContext = $EnableContext
     react         = $React
     autoPublish   = $AutoPublish
 } | ConvertTo-Json
 
-Write-Host "Triggering review for ChangeId: $ChangeId, Patchset: $Patchset"
+Write-Host "Triggering review for ChangeNum: $ChangeNum, Patchset: $Patchset"
 try {
     $response = Invoke-RestMethod -Uri $Url -Method Post -Body $Body -ContentType "application/json"
     Write-Host "Response:"

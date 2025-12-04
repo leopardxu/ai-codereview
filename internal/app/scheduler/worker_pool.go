@@ -7,7 +7,7 @@ import (
 )
 
 type Task struct {
-	ChangeId      string
+	ChangeNum     string
 	Patchset      string
 	EnableContext bool
 }
@@ -29,7 +29,7 @@ func (p *WorkerPool) Run(ctx context.Context) {
 				return
 			case t := <-p.ch:
 				fc := core.NewFlowContext()
-				fc.ChangeId = t.ChangeId
+				fc.ChangeNum = t.ChangeNum
 				fc.Patchset = t.Patchset
 				fc.EnableContext = t.EnableContext
 
@@ -41,11 +41,11 @@ func (p *WorkerPool) Run(ctx context.Context) {
 				res, err := f.Execute(ctx, fc)
 				if err != nil {
 					// In a real app, use a logger
-					// log.Printf("Task failed for %s/%s: %v", t.ChangeId, t.Patchset, err)
+					// log.Printf("Task failed for %s/%s: %v", t.ChangeNum, t.Patchset, err)
 					continue
 				}
 				if v, ok := res["preview"].(map[string]interface{}); ok {
-					core.PutReview("S-"+t.ChangeId+"-"+t.Patchset, v, t.ChangeId, t.Patchset)
+					core.PutReview("S-"+t.ChangeNum+"-"+t.Patchset, v, t.ChangeNum, t.Patchset)
 				}
 			}
 		}
